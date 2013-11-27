@@ -1,0 +1,8 @@
+{
+  "name": "mongoskinstore",
+  "description": "express/connect session store using mongoskin",
+  "version": "0.4.3",
+  "author": "",
+  "main": "./mongoskinstore.js",
+  "engines": { "node": "*" }
+}

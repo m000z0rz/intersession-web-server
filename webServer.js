@@ -2,7 +2,8 @@
 var httpServerPort = 8090;
 
 var mongo = require('mongoskin');
-var mongoskinstore = require('mongoskinstore');
+//var mongoskinstore = require('mongoskinstore');
+var mongoskinstore = require('./mongoskinstore');
 var mongodb = mongo.db('mongodb://admin:rollerbotpass@paulo.mongohq.com:10018/rollerbot_test?auto_reconnect');
 var mongoStore = new mongoskinstore({db: mongodb});
 
