@@ -31,35 +31,6 @@ socketIO.sockets.on('connection', function(socket) {
 	socket.on('saveController', function(data, clientCallback) {
 		console.log('save request ', data.controller);
 		var controller = data.controller;
-		
-		//collection.save({_id:"abc", user:"David"},{safe:true}, callback)
-
-		/*
-		mongodb.collection('controllers').save(data.controller, {}, function(err, result) {
-			console.log('controller save, err ', err, ' result ', result);
-			if(err) clientCallback({err: err});
-			else {
-				if(result === 1) {
-					// regular save
-					clientCallback({});
-				} else {
-					var controller = result;
-					// result is controller object. it was inserted
-					mongodb.collection('settings').findOne({settingsID: 1}, function(err, settings) {
-						controller.controllerID = settings.nextControllerID;
-						mongodb.collection('controllers').save(controller, {}, function(err, result) {
-							console.log('controller save err? ', err, ' result ', result);
-							clientCallback({newID: controller.controllerID});
-						});
-						settings.nextControllerID = settings.nextControllerID = 1;
-						mongodb.collection('settings').save(settings, {}, function(err, result) {
-							console.log('settings save err? ', err, ' result ', result);
-						});
-					});
-				}	
-			}
-		});
-		*/
 
 		mongodb.collection('controllers').update(
 			{ controllerID: controller.controllerID },
@@ -135,6 +106,7 @@ socketIO.sockets.on('connection', function(socket) {
 
 
 
+
 // Express ////////////////////////////////////////////////
 
 app.use(express.bodyParser());
@@ -143,10 +115,18 @@ app.use(express.session({ secret: "whaaaaatS?", store: mongoStore }));
 
 app.get('/', function (req, res) {
     //res.redirect('/client.html');
+    console.log('send /');
     res.sendfile(__dirname + "/public/client.html");
 });
 
+app.get('/js/Bluetooth.js', function(req, res) {
+	console.log('send bluetooth');
+    // deliver the local version of this
+    res.sendfile(__dirname + '/public/js/Bluetooth_web.js');
+});
+
 app.get('/screen*', function(req, res) {
+	console.log('send screen*');
     res.sendfile(__dirname + '/public/client.html');
 });
 

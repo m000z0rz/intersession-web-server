@@ -1,0 +1,357 @@
+<html>
+<head>
+	<title>RollerBot control</title>
+
+	<style type="text/css">
+
+		body {
+			font-family: "Helvetica Neue", Helvetica, Arial, sans serif;
+			font-size: 14px;
+			
+			color: #333333;
+		}
+
+		.menu {
+			width: 100%;
+			max-width: 600px;
+			padding: 5px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.full {
+			overflow: auto;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+		}
+
+		.fullstripe {
+			overflow: auto;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			max-width: 600px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.terminal {
+			word-wrap: break-word;
+			overflow-x: hidden;
+			overflow-y: scroll;
+		}
+
+		h1, h2, h3, h4, h5, h6 {
+			font-weight: bold;
+			margin: 3px;
+		}
+
+		h1 {
+			padding: 10px;
+		}
+
+		small {
+			font-size: 0.75em;
+		}
+
+		.sub {
+			margin-left: 10px;
+		}
+
+		ul {
+			list-style-type: none;
+			padding: 0px;
+			margin: 0px;
+		}
+
+		ul li {
+			padding: 10px;
+			margin: 2px;
+			border: 1px solid #e1e1e8;
+			border-radius: 3px;
+		}
+
+		.button {
+			border: 1px solid #e1e1e8;
+			border-radius: 3px;
+			background-color: #e7e7e9;
+			cursor: pointer;
+		}
+
+		.button:hover {
+			background-color: #ffffff;
+		}
+
+
+		ul li.even {
+			background-color: #e7e7e9;
+		}
+
+		ul li.odd {
+			background-color: #f7f7f9;
+		}
+
+		ul li.clickable:hover {
+			background-color: #ffffff;
+			cursor: pointer;
+		}
+
+		input {
+			border: 1px solid #e1e1e8;
+			border-radius: 3px;
+			font-size: 1em;
+			color: inherit;
+			font-family: inherit;
+		}
+
+		.titleBar {
+			background-color: #f7f7f9;
+			border-bottom: 1px solid #e1e1e8
+		}
+
+		.titleIconButton {
+			float: right;
+			padding: 2px;
+			padding-left: 10px;
+			padding-right: 10px;
+			margin: 2px;
+			border: 1px solid #e1e1e8;
+			border-radius: 3px;
+			background-color: #e7e7e9;
+			cursor: pointer;
+
+			font-weight: bold;
+			font-size: 1.5em;
+		}
+
+		.titleIconButton:hover {
+			background-color: #ffffff;
+		}
+
+		.titleIconButtonDeactivated {
+			float: right;
+			padding: 2px;
+			padding-left: 10px;
+			padding-right: 10px;
+			margin: 2px;
+			border: 1px solid #e1e1e8;
+			border-radius: 3px;
+			background-color: #e7e7e9;
+			cursor: default;
+
+			color: #e1e1e8;
+			font-weight: bold;
+			font-size: 1.5em;
+		}
+
+
+
+		.screen {
+			opacity: 0;
+			display: none;
+			transition: opacity 0.5s;
+			-webkit-transition: opacity 0.5s;
+			-moz-transition: opacity 0.5s;
+		}
+
+		.draggable {
+			cursor: move;
+		}
+
+
+	</style>
+</head>
+<body>
+
+<div id="screensDiv">
+
+</div>
+
+
+
+<!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
+<script src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src='/js/EventEmitter-4.0.3.min.js'></script>
+<script type='text/javascript' src='/js/controlDefinitions.js'></script>
+<script type='text/javascript' src='/js/controls.js'></script>
+<script type='text/javascript' src='/js/shortcut.js'></script>
+
+
+<script type='text/javascript' src='/js/screens.js'></script>
+<!--<script type='text/javascript' src='/js/screenControlSelect.js'></script>-->
+<script type='text/javascript' src='/js/screenPortSelect.js'></script>
+<script type='text/javascript' src='/js/screenTerminal.js'></script>
+<script type='text/javascript' src='/js/screenControl.js'></script>
+<script type='text/javascript' src='/js/screenEdit.js'></script>
+<script type='text/javascript' src='/js/screenEditProperties.js'></script>
+
+
+<script type='text/javascript' src='/js/screenBotSelect.js'></script>
+<script type='text/javascript' src='/js/screenControlPanel.js'></script>
+
+<script type='text/javascript' src='/js/Bluetooth.js'></script>
+
+<script type='text/javascript'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var hostType = 'web';
+
+
+
+
+
+
+
+// socket to web server /////////////////////////////////////////////
+var webSocket = io.connect('http://192.168.1.2:8090');
+//var webSocket = io.connect('http://localHost:8090');
+webSocket.on('connect', function() {
+	console.log(webSocket);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var state = {};
+var historyState = {};
+
+
+
+function asArray(pseudoArray) {
+	return Array.prototype.slice.call(pseudoArray);
+}
+
+
+function clearChildren(element) {
+	while(element.firstChild) {
+		element.removeChild(element.firstChild);
+	}
+}
+
+function clearSVG(svg) {
+	clearChildren(svg);
+
+	var rect = createSVGElement('rect');
+	svgAttr(rect, 'x', 0); svgAttr(rect, 'y', 0);
+	svgAttr(rect, 'rx', 10); svgAttr(rect, 'ry', 10);
+	svgAttr(rect, 'width', '2000'); svgAttr(rect, 'height', '1000');
+
+	rect.style.fill = '#ffffff';
+	rect.style.stroke = '#aaaaaa';
+	rect.style.strokeWidth = 1;
+	svg.appendChild(rect);
+	//control.svg.rect = rect;
+}
+
+function unescapeForSerial(string) {
+	return string.replace(/\\n/g, '\n')
+			.replace(/\\r/g, '\r')
+			.replace(/\\\\/g, '\\');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.onpopstate = function(e) {
+	//console.log('pop state ', window.location.pathname, e.state);
+	handleNavigate(true);
+	if(e.state) historyState = e.state;
+	else historyState = {};
+};
+
+function handleNavigate(dontPushState) {
+	if(!Bluetooth.isReady) return;
+	var urlPath = window.location.pathname.split('/');
+	var pushState = !dontPushState;
+	var urlOptions = {};
+
+	var screenName = urlPath[1];
+	if(screenName === undefined || screenName === '') screenName = 'screenBotSelect';
+	for(var i = 2; i < urlPath.length; i += 2) {
+		 urlOptions[urlPath[i]] = urlPath[i+1];
+	}
+
+
+	console.log('handleNavigate to screenName', screenName, ', pushState? ', pushState);
+	Screens.navigateTo(screenName, urlOptions, undefined, pushState);
+}
+
+
+
+
+
+Bluetooth.on('ready', function() {
+	ControlInterface.setBluetooth(Bluetooth);
+	ControlInterface.setShortcut(shortcut);
+
+
+
+
+	Screens.buildDOM();
+
+	handleNavigate();
+
+	//window.setTimeout(onResize, 1000);
+	window.setTimeout(Screens.onResize, 1000);
+});
+
+
+
+
+
+</script>
+
+</body>
+</html>
