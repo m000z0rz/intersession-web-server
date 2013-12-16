@@ -11,6 +11,23 @@ var express = require('express');
 var app = express();
 
 
+var localServers = [];
+var localServerMap = {};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Websocket //////////////////////////////////////////////
@@ -24,9 +41,115 @@ socketIO.set('log level', 1);
 socketIO.sockets.on('connection', function(socket) {
 	console.log('socketIO connection');
 
-	socket.on('disconnect', function() {
+	var socketHostname;
 
+	socket.on('disconnect', function() {
+		localServers = localServers.filter(function(localServerObject) {
+			return localServerObject.socket.id !== socket.id;
+		});
+		localServerMap[socketHostname] = undefined;
 	});
+
+	socket.on('listPorts', function(data, clientCallback) {
+		var returns = [];
+		var numReturned = 0;
+		var numToReturn = localServers.length;
+		if(localServers.length === 0) {
+			clientCallback({});
+		} else {
+			localServers.forEach(function(localServer, index) {
+				localServer.socket.emit('listPorts', function(data) {
+					returns.push(data);
+					numReturned += 1;
+					if(numReturned === numToReturn) {
+						var returnPorts = [];
+						returns.forEach(function(data) {
+							returnPorts = returnPorts.concat(data.ports.map(function(port) {
+								port.portName = data.hostname + ':' + port.portName;
+								return port;
+							}));
+						});
+						clientCallback({
+							ports: returnPorts,
+							hostname: ''
+						});
+					}
+				});
+			});
+		}
+	});
+
+	socket.on('subscribePort', function(data, clientCallback) {
+		var pieces = data.portName.split(':');
+		var hostname = pieces[0];
+		var portname = pieces[1];
+
+		var localServer = localServerMap[hostname];
+		if(!localServer) {
+			clientCallback({err: 'bad hostname'});
+			return;
+		} 
+		localServer.socket.emit('subscribePort', {portName: portname}, function(data) {
+			clientCallback();
+		});
+	});
+
+	socket.on('unsubscribePort', function(data, clientCallback) {
+		var pieces = data.portName.split(':');
+		var hostname = pieces[0];
+		var portname = pieces[1];
+
+		var localServer = localServerMap[hostname];
+		if(!localServer) {
+			clientCallback({err: 'bad hostname'});
+			return;
+		}
+		localServer.socket.emit('unsubscribePort', {portName: portname}, function(data) {
+			clientCallback();
+		});
+	});
+
+	socket.on('sendOnPort', function(data, clientCallback) {
+		var pieces = data.portName.split(':');
+		var hostname = pieces[0];
+		var portname = pieces[1];
+
+		var localServer = localServerMap[hostname];
+		if(!localServer) {
+			clientCallback({err: 'bad hostname'});
+			return;
+		}
+		localServer.socket.emit('sendOnPort', {
+				portName: portname,
+				serialData: data.serialData
+			}, function(lData) {
+				clientCallback(lData);
+			}
+		);
+	});
+
+
+
+
+
+	socket.on('registerLocalServer', function(data) {
+		socketHostname = data.hostname;
+		var localServerObject = {
+			hostname: data.hostname,
+			socket: socket
+		};
+		localServers.push(localServerObject);
+		localServerMap[data.hostname] = localServerObjects;	
+	});
+
+
+
+
+
+
+
+
+
 
 	socket.on('saveController', function(data, clientCallback) {
 		console.log('save request ', data.controller);

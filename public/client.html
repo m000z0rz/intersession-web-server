@@ -212,20 +212,21 @@
 
 
 
-var hostType = 'web';
+//var hostType = 'web';
 
 
 
 
 
 
-
+/*
 // socket to web server /////////////////////////////////////////////
 var webSocket = io.connect('http://192.168.1.2:8090');
 //var webSocket = io.connect('http://localHost:8090');
 webSocket.on('connect', function() {
 	console.log(webSocket);
 });
+*/
 
 
 
@@ -305,7 +306,6 @@ function unescapeForSerial(string) {
 
 
 window.onpopstate = function(e) {
-	//console.log('pop state ', window.location.pathname, e.state);
 	handleNavigate(true);
 	if(e.state) historyState = e.state;
 	else historyState = {};
@@ -323,8 +323,6 @@ function handleNavigate(dontPushState) {
 		 urlOptions[urlPath[i]] = urlPath[i+1];
 	}
 
-
-	console.log('handleNavigate to screenName', screenName, ', pushState? ', pushState);
 	Screens.navigateTo(screenName, urlOptions, undefined, pushState);
 }
 
@@ -336,14 +334,10 @@ Bluetooth.on('ready', function() {
 	ControlInterface.setBluetooth(Bluetooth);
 	ControlInterface.setShortcut(shortcut);
 
-
-
-
 	Screens.buildDOM();
 
 	handleNavigate();
 
-	//window.setTimeout(onResize, 1000);
 	window.setTimeout(Screens.onResize, 1000);
 });
 
