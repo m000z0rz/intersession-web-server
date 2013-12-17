@@ -44,7 +44,7 @@ defineScreen(function () {
 			return url;
 		},
 		onNavigateTo: function(screen, urlOptions, otherOptions) {
-			Controller.fetchByID(urlOptions.controllerID, function(controller) {
+			Controller.fetchByID(+urlOptions.controllerID, function(controller) {
 				if(!controller) {
 					console.log('couldnt fetch controller');
 				} else {
@@ -59,7 +59,7 @@ defineScreen(function () {
 
 
 			function theRest() {
-				screen.controlInterface = new ControlInterface(urlOptions.comPort);
+				screen.controlInterface = new ControlInterface(urlOptions.port);
 
 				var controlSVG = screen.dom.svg;
 				clearSVG(controlSVG);

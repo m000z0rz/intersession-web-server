@@ -261,7 +261,7 @@ defineScreen(function (screen) {
 			return url;
 		},
 		onNavigateTo: function(screen, urlOptions, otherOptions) {
-			Controller.fetchByID(urlOptions.controllerID, function(controller) {
+			Controller.fetchByID(+urlOptions.controllerID, function(controller) {
 				screen.controller = controller;
 
 				screen.clearSelection();

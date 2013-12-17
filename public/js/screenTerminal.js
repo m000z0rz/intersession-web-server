@@ -107,7 +107,7 @@ defineScreen(function (screen) {
 			var targetTerminalElement;
 			var makeTerminalOnData = function(source) {
 				return function(data) {
-					if(data.portName === screen.urlOptions.port) {
+					if(screen.urlOptions && screen.urlOptions.port === data.portName) {
 						terminalAddData(source, data.serialData);
 					}
 				};
