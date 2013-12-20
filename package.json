@@ -1,6 +1,6 @@
 {
   "name": "webRollerServer",
-  "version": "0.0.1-4",
+  "version": "0.0.1-7",
   "description": "Web server for Intersession 2014",
   "main": "server.js",
   "dependencies": {

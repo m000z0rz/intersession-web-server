@@ -375,4 +375,11 @@ app.get('/screen*', function(req, res, next) {
     res.sendfile(__dirname + '/public/client.html');
 });
 
+
+app.get('/client.html', function(req, res, next) {
+	console.log('send client direct');
+	res.sendfile(__dirname + '/public/client.html');
+});
+
+
 app.use(express.static(__dirname + '/public',  {maxAge: 1}));
