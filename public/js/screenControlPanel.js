@@ -11,6 +11,7 @@ defineScreen(function (screen) {
 			screen.dom.portButton = screen.buildTitleButton('', 'Port', function() {
 				screen.navigateTo('screenPortSelect', {botID: screen.urlOptions.botID}, {port: screen.urlOptions.port});
 			});
+			screen.dom.portButton.style.maxWidth = '100px';
 
 			screen.dom.botButton = screen.buildTitleButton('', 'Bot', function() {
 				screen.navigateTo('screenBotEdit', {botID: screen.urlOptions.botID});

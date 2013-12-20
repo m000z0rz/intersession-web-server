@@ -1220,7 +1220,7 @@ defineControl(function() {
 				var pos = svgGetPosition(slider);
 				var value = {
 					x: Math.round(map(pos.x, -sliderMaxRadius, sliderMaxRadius, 0, 1023)),
-					y: Math.round(map(pos.y, -sliderMaxRadius, sliderMaxRadius, 0, 1023))
+					y: Math.round(map(pos.y, -sliderMaxRadius, sliderMaxRadius, 1023, 0))
 				};
 				var toSend = control.getPropertyValue('sendOnChange');
 				if(toSend && toSend !== '') {
