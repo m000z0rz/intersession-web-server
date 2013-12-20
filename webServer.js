@@ -1,5 +1,6 @@
 //var httpServerPort = 80;
-var httpServerPort = 8090;
+//var httpServerPort = 8090;
+var httpServerPort = process.env['ROLLERBOTLISTENPORT'];
 
 var mongo = require('mongoskin');
 //var mongoskinstore = require('mongoskinstore');
