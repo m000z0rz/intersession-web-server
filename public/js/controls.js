@@ -28,6 +28,14 @@ var ControlInterface = (function () {
 		Bluetooth.sendOnPort(this.comPort, serialData);
 	};
 
+	ControlInterface.prototype.sendOnDisconnect = function(serialData) {
+		Bluetooth.sendOnDisconnect(this.comPort, serialData);
+	};
+
+	ControlInterface.prototype.flushOnDisconnect = function () {
+		Bluetooth.flushOnDisconnect();
+	};
+
 	ControlInterface.prototype.watchForReceive = function (rx, onReceive) {
 		var regexString = encodeRegex(rx);
 		this.receiveWatches.push({
@@ -96,6 +104,7 @@ var ControlInterface = (function () {
 	ControlInterface.prototype.clearEvents = function () {
 		var self = this;
 		this.clearShortcuts();
+		this.flushOnDisconnect();
 		receiveWatches = [];
 		controlInterfaces = controlInterfaces.filter(function(controlInterface) {
 			return controlInterface !== self;

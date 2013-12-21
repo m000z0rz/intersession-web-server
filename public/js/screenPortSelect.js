@@ -66,6 +66,7 @@ defineScreen(function (screen) {
 				li.appendChild(small);
 				li.addEventListener('click', function(e) {
 					if(otherOptions && otherOptions.port && otherOptions.port !== port.portName) Bluetooth.closePort(otherOptions.port);
+					localStorage['defaultPort'] = port.portName;
 					screen.navigateTo('screenControlPanel', {
 						botID: urlOptions.botID,
 						port: port.portName

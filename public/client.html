@@ -313,15 +313,38 @@ window.onpopstate = function(e) {
 
 function handleNavigate(dontPushState) {
 	if(!Bluetooth.isReady) return;
+	console.log('handle navigate');
 	var urlPath = window.location.pathname.split('/');
 	var pushState = !dontPushState;
 	var urlOptions = {};
 
 	var screenName = urlPath[1];
-	if(screenName === undefined || screenName === '') screenName = 'screenBotSelect';
 	for(var i = 2; i < urlPath.length; i += 2) {
 		 urlOptions[urlPath[i]] = urlPath[i+1];
 	}
+
+	console.log('url options', urlOptions);
+	if(screenName === undefined || screenName === '') {
+		console.log('must get screen name');
+		if(urlOptions['botID'] === undefined) {
+			var defaultBotID = localStorage['defaultBotID'];
+			if(defaultBotID) {
+				urlOptions.botID = defaultBotID;
+			}
+		}	
+		if(urlOptions['port'] === undefined) {
+			var defaultPort = localStorage['defaultPort'];
+			if(defaultPort) {
+				urlOptions.port = defaultPort;
+			}
+		}
+		if(urlOptions.botID === undefined) screenName = 'screenBotSelect';
+		else if(urlOptions.port === undefined) screenName = 'screenPortSelect';
+		else screenName = 'screenControlPanel';
+		console.log('screen name now ', screenName);
+	} //screenName = 'screenBotSelect';
+
+	console.log()
 
 	console.log('handleNavigate', screenName, urlOptions);
 

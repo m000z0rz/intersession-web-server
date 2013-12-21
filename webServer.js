@@ -1,6 +1,13 @@
 //var httpServerPort = 80;
 //var httpServerPort = 8090;
-var httpServerPort = process.env['ROLLERBOTLISTENPORT'];
+//var httpServerPort = process.env['ROLLERBOTLISTENPORT'];
+var httpServerPort;
+
+if(process.env['NODE_ENV'] === 'production') {
+	httpServerPort = 80;
+} else if(process.env['NODE_ENV'] === 'dev') {
+	httpServerPort = 8090;
+}
 
 var mongo = require('mongoskin');
 //var mongoskinstore = require('mongoskinstore');
@@ -17,6 +24,22 @@ var localServers = [];
 var localServerMap = {};
 
 
+
+// Array.find polyfill //////////////
+if(Array.prototype.find === undefined) {
+	Array.prototype.find = function(callback, thisObject) {
+		var foundElement;
+		thisObject = thisObject || this;
+		index = 0;
+		while(index < this.length && foundElement === undefined) {
+			if(callback(this[index], index, this) === true) {
+				foundElement = this[index];
+			}
+			index += 1;
+		}
+		return foundElement;
+	};
+}
 
 
 
@@ -43,28 +66,59 @@ socketIO.set('log level', 1);
 socketIO.sockets.on('connection', function(socket) {
 	console.log('socketIO connection');
 
-	var socketHostname;
+	//var socketHostname;
 
 	socket.on('disconnect', function() {
+		//console.log('some kind of disconnect', socket);
 		//console.log('disconnect host ', socketHostname);
+		var filterToSocket = function(client) { return client.socket.id === socket.id; };
 		var filterOutSocket = function(client) { return client.socket.id !== socket.id; };
+		var makeSend = function(localServer, spName) {
+			return function(toSend) { 
+				sendOnPort(localServer, spName, toSend);
+			};
+		};
+
+		var spInfo, client;
+
 		// if it was a localhost
-		localServers = localServers.filter(function(localServerObject) {
-			return localServerObject.socket.id !== socket.id;
+		var localServer = localServers.find(function(localServer) {
+			return localServer.socket.id === socket.id;
 		});
-		localServerMap[socketHostname] = undefined;
+		if(localServer) {
+			console.log('local server disconnect: ' + localServer.hostname);
+			localServers = localServers.filter(function(localServer) {
+				return localServer.socket.id !== socket.id;
+			});
+			localServerMap[localServer.hostname] = undefined;
+		} else {
+			console.log('non-local-server disconnect');
+		}
+		/*
+		if(socketHostname) {
+			console.log('local server disconnect');
+			localServers = localServers.filter(function(localServerObject) {
+				return localServerObject.socket.id !== socket.id;
+			});
+			localServerMap[socketHostname] = undefined;
+		} else {
+			console.log('non-local-server disconnect');
+		}
+		*/
 
 		// if it subscribed to a port
+		flushOnDisconnect(socket);
 		localServers.forEach(function(localServer) {
 			for (var spName in localServer.serialPorts) {
 				spInfo = localServer.serialPorts[spName];
-
-				if(spInfo.clients.filter(function(client) { return client.socket.id === socket.id; }).length > 0) {
+				client = spInfo.clients.find(filterToSocket);
+				if(client) {
+					console.log('client disconnect');
 					spInfo.clients = spInfo.clients.filter(filterOutSocket);
 
 					if(spInfo.clients.length === 0) {
 						localServer.socket.emit('unsubscribePort', {portName: spName});
-					}
+					}					
 				}
 			}
 		});
@@ -165,7 +219,28 @@ socketIO.sockets.on('connection', function(socket) {
 		});
 	});
 
+	function sendOnPort(localServer, portName, serialData, clientCallback) {
+		localServer.socket.emit('sendOnPort', {
+			portName: portName,
+			serialData: serialData
+		}, function(lData) {
+			if(!lData || !lData.err) {
+				var spInfo = localServer.serialPorts[portName];
+				if(spInfo && spInfo.clients) {
+					spInfo.clients.forEach(function(client) {
+						if(client.socket !== socket) {
+							client.socket.emit('otherSent', {
+								portName: data.portName,
+								serialData: data.serialData
+							});
+						}
+					});
+				}
+			}
 
+			if(clientCallback) clientCallback(lData);
+		});
+	}
 
 	socket.on('sendOnPort', function(data, clientCallback) {
 		var pieces = data.portName.split(':');
@@ -177,6 +252,8 @@ socketIO.sockets.on('connection', function(socket) {
 			clientCallback({err: 'bad hostname'});
 			return;
 		}
+		sendOnPort(localServer, portname, data.serialData, clientCallback);
+		/*
 		localServer.socket.emit('sendOnPort', {
 				portName: portname,
 				serialData: data.serialData
@@ -198,6 +275,67 @@ socketIO.sockets.on('connection', function(socket) {
 				clientCallback(lData);
 			}
 		);
+		*/
+	});
+
+	// send and clear all of the sendOnDisconnect messages for a socket
+	// this can happen on an actual disconnect or when request by a socket flushOnDisconnect
+	function flushOnDisconnect(forSocket) {
+		//console.log('disconnect host ', socketHostname);
+		var filterToSocket = function(client) { return client.socket.id === forSocket.id; };
+		//var filterOutSocket = function(client) { return client.socket.id !== socket.id; };
+		var makeSend = function(localServer, spName) {
+			return function(toSend) { 
+				sendOnPort(localServer, spName, toSend);
+			};
+		};
+		var spInfo, client;
+
+		// if it subscribed to a port
+		localServers.forEach(function(localServer) {
+			for (var spName in localServer.serialPorts) {
+				spInfo = localServer.serialPorts[spName];
+
+				client = spInfo.clients.find(filterToSocket);
+				if(client) {
+					if(client.sendOnDisconnect) {
+						console.log('flushing disconnect, sending ' + client.sendOnDisconnect);
+						client.sendOnDisconnect.forEach( makeSend(localServer, spName) );
+					}
+					client.sendOnDisconnect = [];
+				}
+			}
+		});
+	}
+
+	socket.on('flushOnDisconnect', function(data, clientCallback) {
+		flushOnDisconnect(socket);
+		if (clientCallback && typeof clientCallback === 'function') clientCallback();
+	});
+
+	socket.on('sendOnDisconnect', function(data, clientCallback) {
+		console.log('sendOnDisconnect', data);
+		var pieces = data.portName.split(':');
+		var hostname = pieces[0];
+		var portname = pieces[1];
+
+		var localServer = localServerMap[hostname];
+		if(!localServer) {
+			clientCallback({err: 'bad hostname'});
+			return;
+		}
+		var spInfo = localServer.serialPorts[portname];
+		if(spInfo && spInfo.clients) {
+			spInfo.clients.forEach(function(client) {
+				if(client.socket === socket) {
+					if(client.sendOnDisconnect === undefined) client.sendOnDisconnect = [];
+					client.sendOnDisconnect.push(data.serialData);
+				}
+			});
+			clientCallback();
+		} else {
+			clientCallback({err: 'bad portname'});
+		}
 	});
 
 
@@ -206,7 +344,7 @@ socketIO.sockets.on('connection', function(socket) {
 
 	socket.on('registerLocalServer', function(data) {
 		console.log('register local server ', data);
-		socketHostname = data.hostname;
+		//socketHostname = data.hostname;
 		var localServer = {
 			hostname: data.hostname,
 			socket: socket,

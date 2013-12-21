@@ -14,7 +14,7 @@ defineScreen(function (screen) {
 			screen.dom.portButton.style.maxWidth = '100px';
 
 			screen.dom.botButton = screen.buildTitleButton('', 'Bot', function() {
-				screen.navigateTo('screenBotEdit', {botID: screen.urlOptions.botID});
+				screen.navigateTo('screenBotSelect', {botID: screen.urlOptions.botID});
 			});
 
 			var controllerList = document.createElement('ul');

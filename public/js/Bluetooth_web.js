@@ -84,6 +84,24 @@ var Bluetooth = (function() {
 			serialData: data
 		}]);
 	};
+	
+	Bluetooth.sendOnDisconnect = function(portName, data, callback) {
+		webSocket.emit('sendOnDisconnect', {portName: portName, serialData: data}, function(data) {
+			if(callback && typeof callback === 'function') {
+				if(data && data.err) callback(data.err);
+				else callback();
+			}
+		});
+	};
+
+	Bluetooth.flushOnDisconnect = function(callback) {
+		webSocket.emit('flushOnDisconnect', {}, function(data) {
+			if(callback && typeof callback === 'function') {
+				if(data && data.err) callback(data.err);
+				else callback();
+			}
+		});
+	};
 
 	return Bluetooth;
 }) ();

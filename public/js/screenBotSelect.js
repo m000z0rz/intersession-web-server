@@ -26,6 +26,7 @@ defineScreen(function (screen) {
 
 			continueButton.addEventListener('click', function(e) {
 				var botID = input.value;
+				localStorage['defaultBotID'] = botID;
 				//historyState.botID = botID;
 				screen.navigateTo('screenControlPanel', {botID: botID});
 			}, false);

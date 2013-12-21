@@ -1344,6 +1344,94 @@ defineControl(function() {
 
 
 
+// connections
+defineControl(function() {
+	var controlDefinition = {
+		typeID: 'connections',
+		displayName: 'Connections',
+		buildSVG: function(control) {
+			var g = createSVGElement('g');
+			control.svg.g = g;
+			var rect = createSVGElement('rect');
+			svgAttr(rect, 'x', 0); svgAttr(rect, 'y', 0);
+			svgAttr(rect, 'rx', 10); svgAttr(rect, 'ry', 10);
+			svgAttr(rect, 'width', '150'); svgAttr(rect, 'height', '150');
+
+			rect.style.fill = '#e7e7e9';
+			rect.style.stroke = '#e7e7e9';
+			rect.style.strokeWidth = '10px';
+			svgAttr(rect, 'stroke-dasharray', '15px 20px');
+			svgAttr(rect, 'stroke-linejoin', 'round');
+			svgAttr(rect, 'stroke-linecap', 'round');
+			g.appendChild(rect);
+			control.svg.rect = rect;
+
+
+
+			var label = createSVGElement('text');
+			svgAttr(label, 'x', 75); svgAttr(label, 'y', 75);
+			svgAttr(label, 'text-anchor', 'middle');
+			svgAttr(label, 'alignment-baseline', 'middle');
+			svgAttr(label, 'font-size', '1.5em');
+			label.textContent = 'Connections';
+			g.appendChild(label);
+			control.svg.label = label;
+
+			return g;
+		},
+
+		wireEvents: function(control, controlInterface) {
+			var buttonPressed = false;
+
+			control.svg.g.style.display = 'none';
+
+			var toSend = control.getPropertyValue('sendOnConnect') || '';
+			toSend = unescapeForSerial(toSend);
+			if(toSend !== '' ) controlInterface.send(toSend);
+
+			toSend = control.getPropertyValue('sendOnDisconnect') || '';
+			if(toSend !== '') controlInterface.sendOnDisconnect(toSend);
+		},
+
+		properties: {
+			sendOnConnect: {
+				displayName: 'Send on connect',
+				type: 'serial'
+			},
+			sendOnDisconnect: {
+				displayName: 'Send on disconnect',
+				type: 'serial'
+			}
+		},
+
+	};
+
+	return controlDefinition;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // indicator
 defineControl(function() {
 	var controlDefinition = {
