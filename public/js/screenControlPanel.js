@@ -17,7 +17,14 @@ defineScreen(function (screen) {
 				screen.navigateTo('screenBotSelect', {botID: screen.urlOptions.botID});
 			});
 
+			/*
+			var clearDiv = document.createElement('div');
+			clearDiv.style.clear = 'both';
+			div.appendChild(clearDiv);
+			*/
+
 			var controllerList = document.createElement('ul');
+			controllerList.style.clear = 'both';
 			div.appendChild(controllerList);
 			screen.dom.controllerList = controllerList;
 
@@ -28,7 +35,7 @@ defineScreen(function (screen) {
 
 			var addNewControl = document.createElement('div');
 			h2 = document.createElement('h2');
-			h2.textContent = "+ New Control";
+			h2.textContent = "+ New Controller";
 			addNewControl.appendChild(h2);
 			addNewControl.className = 'button';
 			div.appendChild(addNewControl);

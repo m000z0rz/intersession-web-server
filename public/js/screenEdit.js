@@ -157,7 +157,7 @@ defineScreen(function (screen) {
 			screen.buildTitleButton(
 				'screenEdit_properties', 'Properties',
 				function() {
-					var control = selectedControl;
+					var control = screen.selectedControl;
 					if(control) screen.navigateTo('screenEditProperties', {control: control});
 				},
 				false
