@@ -104,6 +104,8 @@ defineScreen(function (screen) {
 
 			}); 
 
+			screen.dom.botButton.textContent = 'Bot: ' + urlOptions.botID;
+			/*
 			if(webSocket.socket.connected) {
 				screen.dom.botButton.textContent = 'Bot: ';
 				
@@ -115,6 +117,7 @@ defineScreen(function (screen) {
 			} else {
 				screen.dom.botButton.textContent = 'Bot: ' + urlOptions.botID;
 			}
+			*/
 
 			if(urlOptions.port) {
 				screen.dom.portButton.textContent = 'Port: ' + urlOptions.port + '*';

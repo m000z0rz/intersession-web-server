@@ -23,6 +23,7 @@ var app = express();
 var localServers = [];
 var localServerMap = {};
 
+var botQueues = {};
 
 
 // Array.find polyfill //////////////
@@ -122,6 +123,9 @@ socketIO.sockets.on('connection', function(socket) {
 				}
 			}
 		});
+
+		// if it was queued bot a bot
+		dequeueFromAll(socket);
 	});
 
 	socket.on('unsubscribePort', function(data, clientCallback) {
@@ -129,6 +133,7 @@ socketIO.sockets.on('connection', function(socket) {
 		var pieces = data.portName.split(':');
 		var hostname = pieces[0];
 		var portname = pieces[1];
+		var filterOutSocket = function(client) { return client.socket.id !== socket.id; };
 
 		var localServer = localServerMap[hostname];
 		if(!localServer) {
@@ -230,8 +235,8 @@ socketIO.sockets.on('connection', function(socket) {
 					spInfo.clients.forEach(function(client) {
 						if(client.socket !== socket) {
 							client.socket.emit('otherSent', {
-								portName: data.portName,
-								serialData: data.serialData
+								portName: portName,
+								serialData: serialData
 							});
 						}
 					});
@@ -408,6 +413,141 @@ socketIO.sockets.on('connection', function(socket) {
 
 
 
+	function dequeueFromBot(socket, botID) {
+		var atIndex;
+		var queue = botQueues[botID];
+
+		queue.forEach(function(queueItem, queueIndex) {
+			if(queueItem.socket === socket) {
+				atIndex = queueIndex;
+			}
+		});
+
+		if(atIndex !== undefined) {
+			console.log('pre q: ', queue);
+			console.log('dequeueing ' + socket.id + ' from ' + botID + ' at index ' + atIndex);
+			queue.splice(atIndex, 1);
+			console.log('post q: ', queue);
+			queue.forEach(function(queueItem, queueIndex) {
+				if(queueIndex >= atIndex) {
+					console.log('queue update on index ' + queueIndex);
+					queueItem.socket.emit('queueUpdate', {
+						botID: botID,
+						queuePosition: queueIndex
+					});
+				}
+			});
+		}
+	}
+
+	function dequeueFromAll(socket) {
+		var queue;
+
+		console.log('dequeue ' + socket.id + ' from all');
+
+		Object.keys(botQueues).forEach(function(botID) {
+			dequeueFromBot(socket, botID);
+
+			/*
+			queue = botQueues[botID];
+			queue = queue.filter(function(queueItem) {
+				return queueItem.socket !== socket;
+			});
+			*/
+		});
+	}
+
+	socket.on('queueForBot', function(data, clientCallback) {
+		var botID = data.botID;
+		var queue;
+
+		if(!botQueues[botID]) {
+			botQueues[botID] = [];
+		}
+
+		queue = botQueues[botID];
+		queue.push({socket: socket});
+
+		if(clientCallback) clientCallback({queuePosition: queue.length-1});
+	});
+
+	socket.on('dequeueFromBot', function(data, clientCallback) {
+		var botID = data.botID;
+		dequeueFromBot(socket, botID);
+		if(clientCallback) clientCallback();
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	socket.on('saveBot', function(data, clientCallback) {
+		var bot = data.bot;
+		console.log('saving bot ', data);
+
+		// unfudge the serial port for default controller
+		/*
+		if(bot.defaultPort && bot.defaultPort.indexOf(':')) {
+			bot.defaultPort = bot.defaultPort.split(':')[1];
+			console.log('unfudged defaultPort to ' + bot.defaultPort);
+		}
+		*/
+
+		mongodb.collection('bots').update(
+			{ botID: bot.botID },
+			{ $set: bot },
+			{ upsert: true },
+			function (err, object) {
+				console.log('bot save request err ', err, ' object ', object);
+				if(err) clientCallback({err: err});
+				else clientCallback({});
+			}
+		);
+	});
+
+	socket.on('fetchBot', function(data, clientCallback) {
+		mongodb.collection('bots').findOne(data, function(err, result) {
+			console.log('fetch bot request err ', err, ' result ', result);
+			/*
+			console.log('fetch request err ', err, ' result ', result);
+			if(err) clientCallback({err: err});
+			else clientCallback({controller: result});
+			*/
+			if(result) {
+				clientCallback({bot: result});
+			} else if(data.botID) {
+				clientCallback({bot: {botID: data.botID}});
+			} else {
+				clientCallback({bot: {}});
+			}
+		});
+	});
+
 
 
 
@@ -470,20 +610,22 @@ socketIO.sockets.on('connection', function(socket) {
 		});
 	});
 
+	/*
 	socket.on('getBotInfo', function(data, clientCallback) {
 		//console.log('fetch request for bot "', data.botID, '"');
-		/*
-		mongodb.collection('bots').find().toArray(function(err, results) {
-			console.log('bot request results ', results);
-		});
-		return;
-		*/
+		
+		//mongodb.collection('bots').find().toArray(function(err, results) {
+		//	console.log('bot request results ', results);
+		//});
+		//return;
+		
 		mongodb.collection('bots').findOne({botID: +data.botID}, function(err, result) {
 			//console.log('fetch request for bot err ', err, ' result ', result);
 			if(err) clientCallback({err: err});
 			else clientCallback({botInfo: result});
 		});
 	});
+	*/
 });
 
 
@@ -512,6 +654,11 @@ app.get('/js/Bluetooth.js', function(req, res) {
 app.get('/screen*', function(req, res, next) {
 	console.log('send screen*');
     res.sendfile(__dirname + '/public/client.html');
+});
+
+app.get('/bot/*', function(req, res, next) {
+	console.log('send bot queue page');
+	res.sendfile(__dirname + '/public/client.html');
 });
 
 

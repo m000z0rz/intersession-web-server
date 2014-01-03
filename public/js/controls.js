@@ -228,10 +228,10 @@ var Control = (function () {
 			return g;
 		};
 
-		this.buildForControl = function(controlInterface) {
+		this.buildForControl = function(svgElement, controlInterface) {
 			this.element = controlDefinition.buildSVG(self);
 			var g = this.element;
-			controlDefinition.wireEvents(self, controlInterface);
+			controlDefinition.wireEvents(self, svgElement, controlInterface);
 			svgAttr(g, 'transform', 'translate(' + this.x + ' ' + this.y + ')');
 			return g;
 		};
@@ -362,10 +362,18 @@ var Controller = (function () {
 		//this.setForHostname = function(value) { forHostname = value; };
 		//this.setForPort = function(value) { forPort = value; };
 
+
 		var saveCallback = function(data) {
 			//console.log('save callback, data ',data);
 			if(data && data.err) console.log('save err ', data.err);
 			//else console.log('save successful');
+		};
+
+
+		this.toggleDefault = function() {
+			self.setDefault(!self.isDefault());
+			//isDefault = !isDefault;
+			//self.save(saveCallback);
 		};
 
 		this.addControl = function(control, suppressSave) {
@@ -392,27 +400,19 @@ var Controller = (function () {
 
 		this.toJSON = function() {
 			return {
-				//forHostname: forHostname,
-				//forPort: forPort,
 				botID: self.botID(),
 				name: self.name(),
 				controllerID: self.controllerID,
-				//compiledID: self.getCompiledID(),
 				controls: self.controls
 			};
 		};
 
 		this.save = function(callback) {
-			var controllers = JSON.parse(localStorage.getItem('controllers')) || {};
+			//var controllers = JSON.parse(localStorage.getItem('controllers')) || {};
 			var thisJSON = this.toJSON();
-
-
-			//controllers[self.getCompiledID()] = thisJSON;
-			//localStorage.setItem('controllers', JSON.stringify(controllers));
 
 			if(webSocket.socket.connected) {
 				webSocket.emit('saveController', {controller: thisJSON}, function(data) {
-					//if(data && data.newID) console.log('saved with new ID)');
 					if(callback && typeof callback === 'function') callback(data);
 				});
 			}
@@ -440,7 +440,6 @@ var Controller = (function () {
 		var controller = new Controller(json.controllerID, json.botID, json.name);
 
 		json.controls.forEach(function(jsonControl) {
-			//controller.controls.push(Control.fromJSON(jsonControl));
 			controller.addControl(Control.fromJSON(jsonControl), true);
 		});
 
@@ -512,7 +511,6 @@ var Controller = (function () {
 		};
 
 		if(webSocket.socket.connected) {
-			console.log('websocket by ' + controllerID);
 			webSocket.emit('fetchController', { controllerID: controllerID }, function(data) {
 				if(data.err) {
 					console.log('controller fetch err ', data.err);

@@ -180,6 +180,7 @@
 <script type='text/javascript' src='/js/EventEmitter-4.0.3.min.js'></script>
 <script type='text/javascript' src='/js/controlDefinitions.js'></script>
 <script type='text/javascript' src='/js/controls.js'></script>
+<script type='text/javascript' src='/js/bots.js'></script>
 <script type='text/javascript' src='/js/shortcut.js'></script>
 
 
@@ -194,6 +195,8 @@
 
 <script type='text/javascript' src='/js/screenBotSelect.js'></script>
 <script type='text/javascript' src='/js/screenControlPanel.js'></script>
+
+<script type='text/javascript' src='/js/screenQueue.js'></script>
 
 <script type='text/javascript' src='/js/Bluetooth.js'></script>
 
@@ -271,6 +274,7 @@ function clearSVG(svg) {
 	rect.style.stroke = '#aaaaaa';
 	rect.style.strokeWidth = 1;
 	svg.appendChild(rect);
+	//svg.removeEventListeners();
 	//control.svg.rect = rect;
 }
 
@@ -280,7 +284,16 @@ function unescapeForSerial(string) {
 			.replace(/\\\\/g, '\\');
 }
 
-
+function getSVGElement(url, callback) {
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", url);
+	xmlhttp.onload = function() {
+		if(callback && typeof callback === 'function') {
+			callback(xmlhttp.responseXML.querySelector('svg'));
+		}
+	}
+	xmlhttp.send();
+}
 
 
 
@@ -320,8 +333,13 @@ function handleNavigate(dontPushState) {
 	var urlOptions = {};
 
 	var screenName = urlPath[1];
-	for(var i = 2; i < urlPath.length; i += 2) {
-		 urlOptions[urlPath[i]] = urlPath[i+1];
+	if(screenName === 'bot') {
+		// special quick case for queue
+		urlOptions.botID = urlPath[2];
+	} else {
+		for(var i = 2; i < urlPath.length; i += 2) {
+			 urlOptions[urlPath[i]] = urlPath[i+1];
+		}
 	}
 
 	console.log('url options', urlOptions);

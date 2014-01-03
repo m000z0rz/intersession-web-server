@@ -71,7 +71,7 @@ defineScreen(function () {
 
 			function putControl(control) {
 				var svg = screen.dom.svg;
-				var g = control.buildForControl(screen.controlInterface);
+				var g = control.buildForControl(svg, screen.controlInterface);
 				svg.appendChild(g);
 			}
 		},

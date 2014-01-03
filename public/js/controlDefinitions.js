@@ -153,7 +153,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var buttonPressed = false;
 
 			function pressed() {
@@ -334,7 +334,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var svg = control.svg;
 			var isPressed = false;
 
@@ -408,6 +408,7 @@ defineControl(function() {
 
 			
 			/*
+
 			var buttonPressed = false;
 
 
@@ -610,7 +611,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var circle = control.svg.circle;
 			var slider = control.svg.slider;
 			var isDragging = false;
@@ -642,11 +643,11 @@ defineControl(function() {
 			}, false);
 
 			var scaleFactor;
-			var svg = document.getElementById('screenControl_svg');
+			//var svg = document.getElementById('screenControl_svg');
 
 
 
-			svg.addEventListener('touchmove', function(e) {
+			svgElement.addEventListener('touchmove', function(e) {
 				var touch;
 				asArray(e.changedTouches).forEach(function(t) {
 					if (t.identifier === dragTouchIdentifier) touch = t;
@@ -656,7 +657,7 @@ defineControl(function() {
 				}
 			}, false);
 
-			svg.addEventListener('mousemove', function(e) {
+			svgElement.addEventListener('mousemove', function(e) {
 				drag(e, e.clientX);
 			}, false);
 
@@ -681,7 +682,7 @@ defineControl(function() {
 			function drag(e, clientX) {
 				var scaleFactor;
 				if(isDragging) {
-					scaleFactor = getControlScale(svg);
+					scaleFactor = getControlScale(svgElement);
 					var dX = clientX - lastDragPosition.x;
 
 					svgTranslate(slider, scaleFactor * dX, 0);
@@ -717,8 +718,8 @@ defineControl(function() {
 			};
 
 			addPointerListeners(slider, ['mouseup', 'touchend'], endDrag);
-			svg.addEventListener('mouseleave', endDrag, false);
-			svg.addEventListener('mouseup', endDrag, false);
+			svgElement.addEventListener('mouseleave', endDrag, false);
+			svgElement.addEventListener('mouseup', endDrag, false);
 		},
 
 		properties: {
@@ -869,7 +870,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var circle = control.svg.circle;
 			var slider = control.svg.slider;
 			var isDragging = false;
@@ -901,11 +902,11 @@ defineControl(function() {
 			}, false);
 
 			var scaleFactor;
-			var svg = document.getElementById('screenControl_svg');
+			//var svg = document.getElementById('screenControl_svg');
 
 
 
-			svg.addEventListener('touchmove', function(e) {
+			svgElement.addEventListener('touchmove', function(e) {
 				var touch;
 				asArray(e.changedTouches).forEach(function(t) {
 					if (t.identifier === dragTouchIdentifier) touch = t;
@@ -915,7 +916,7 @@ defineControl(function() {
 				}
 			}, false);
 
-			svg.addEventListener('mousemove', function(e) {
+			svgElement.addEventListener('mousemove', function(e) {
 				drag(e, e.clientY);
 			}, false);
 
@@ -940,7 +941,7 @@ defineControl(function() {
 			function drag(e, clientY) {
 				var scaleFactor;
 				if(isDragging) {
-					scaleFactor = getControlScale(svg);
+					scaleFactor = getControlScale(svgElement);
 					var dY = clientY - lastDragPosition.y;
 
 					svgTranslate(slider, 0, scaleFactor * dY);
@@ -976,8 +977,8 @@ defineControl(function() {
 			};
 
 			addPointerListeners(slider, ['mouseup', 'touchend'], endDrag);
-			svg.addEventListener('mouseleave', endDrag, false);
-			svg.addEventListener('mouseup', endDrag, false);
+			svgElement.addEventListener('mouseleave', endDrag, false);
+			svgElement.addEventListener('mouseup', endDrag, false);
 		},
 
 		properties: {
@@ -1160,7 +1161,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var circle = control.svg.circle;
 			var slider = control.svg.slider;
 			var isDragging = false;
@@ -1168,7 +1169,7 @@ defineControl(function() {
 			var dragTouchIdentifier;
 
 			var scaleFactor;
-			var svg = document.getElementById('screenControl_svg');
+			//var svg = document.getElementById('screenControl_svg');
 
 			slider.style.cursor = 'pointer';
 
@@ -1196,7 +1197,7 @@ defineControl(function() {
 			}, false);
 
 
-			svg.addEventListener('touchmove', function(e) {
+			svgElement.addEventListener('touchmove', function(e) {
 				var touch;
 				asArray(e.changedTouches).forEach(function(t) {
 					if (t.identifier === dragTouchIdentifier) touch = t;
@@ -1206,7 +1207,7 @@ defineControl(function() {
 				}
 			}, false);
 
-			svg.addEventListener('mousemove', function(e) {
+			svgElement.addEventListener('mousemove', function(e) {
 				drag(e, e.clientX, e.clientY);
 			}, false);
 
@@ -1236,7 +1237,7 @@ defineControl(function() {
 			function drag(e, clientX, clientY) {
 				var scaleFactor;
 				if(isDragging) {
-					scaleFactor = getControlScale(svg);
+					scaleFactor = getControlScale(svgElement);
 					var dX = clientX - lastDragPosition.x;
 					var dY = clientY - lastDragPosition.y;
 
@@ -1286,8 +1287,8 @@ defineControl(function() {
 			};
 
 			addPointerListeners(slider, ['mouseup', 'touchend'], endDrag);
-			svg.addEventListener('mouseleave', endDrag, false);
-			svg.addEventListener('mouseup', endDrag, false);
+			svgElement.addEventListener('mouseleave', endDrag, false);
+			svgElement.addEventListener('mouseup', endDrag, false);
 		},
 
 		properties: {
@@ -1380,7 +1381,7 @@ defineControl(function() {
 			return g;
 		},
 
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var buttonPressed = false;
 
 			control.svg.g.style.display = 'none';
@@ -1460,7 +1461,7 @@ defineControl(function() {
 
 			return g;
 		},
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			controlDefinition.forEachColor(function(colorName, color) {
 				var rx = control.getPropertyValue('onReceive_' + colorName);
 				if(rx && rx !== '') {
@@ -1612,7 +1613,7 @@ defineControl(function() {
 
 			return g;
 		},
-		wireEvents: function(control, controlInterface) {
+		wireEvents: function(control, svgElement, controlInterface) {
 			var svg = control.svg;
 			var needle = svg.needle;
 

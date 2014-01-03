@@ -114,6 +114,56 @@ defineScreen(function (screen) {
 
 			screen.buildTitleBar('Edit');
 
+			screen.setStarColor = function() {
+				console.log('setting star color');
+				Bot.fetchByID(screen.urlOptions.botID, function(bot) {
+					console.log('fetched by id', bot);
+					var controller = screen.controller;
+					var star = screen.dom.star;
+					var defaultPort = bot.defaultPort();
+					var onPort = screen.urlOptions.port;
+
+					//if(onPort && onPort.indexOf(':') !== -1) onPort = onPort.split(':')[1];
+					if(controller && bot.defaultControllerID() === controller.controllerID && bot.defaultPort() === onPort) {
+						if(star) star.style.fill = 'gold';
+					} else {
+						if(star) star.style.fill = 'lightgray';
+					}
+				});
+			};
+
+			getSVGElement('/icons/star.svg', function(starSVG) {
+				screen.dom.star = starSVG.querySelector('g');
+				screen.dom.star.style.cursor = 'pointer';
+				screen.dom.titleBar.insertBefore(starSVG, screen.dom.titleBar.firstChild);
+				//star.svg.style.fill = 'lightgray';
+				//setStarColor();
+				starSVG.classList.add('clickable');
+				starSVG.style.width = '20px';
+				starSVG.style.height = '20px';
+
+				starSVG.addEventListener('click', function(e) {
+					console.log('star click');
+					Bot.fetchByID(screen.urlOptions.botID, function(bot) {
+						var controller = screen.controller;
+						if(controller && bot.defaultControllerID() === controller.controllerID && bot.defaultPort() === screen.urlOptions.port) {
+							// is default right now. clear it
+							bot.setDefaults('', '');
+						} else {
+							// is not default right now. set it
+							bot.setDefaults(controller.controllerID, screen.urlOptions.port);
+						}
+						screen.setStarColor();
+					});
+					console.log('toggle default');
+					/*
+					screen.controller.toggleDefault(function() {
+						setStarColor();
+					});
+					*/
+				});
+			});
+
 			var nameEdit = document.createElement('input');
 			screen.dom.nameEdit = nameEdit;
 			var disableNameSave = false;
@@ -272,6 +322,8 @@ defineScreen(function (screen) {
 				
 				clearSVG(editSVG);
 				screen.controller.controls.forEach(screen.putControl);
+
+				screen.setStarColor();
 			});
 
 			shortcut.add('Delete', screen.deleteControl);
