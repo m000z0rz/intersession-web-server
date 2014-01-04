@@ -36,6 +36,25 @@ defineScreen(function (screen) {
 				}
 			});
 
+			var creatorEdit = document.createElement('input');
+			screen.dom.creatorEdit = creatorEdit;
+			var disableCreatorSave = false;
+			screen.setCreatorWithoutSave = function(newCreator) {
+				disableCreatorSave = true;
+				creatorEdit.value = newCreator;
+				disableCreatorSave = false;
+			};
+			var creatorSaveTimeoutID;
+			var creatorSaveTimeoutDelay = 300;
+			screen.dom.creatorEdit.addEventListener('change', function(e) {
+				if(!disableCreatorSave) {
+					if(creatorSaveTimeoutID) window.clearTimeout(creatorSaveTimeoutID);
+					creatorSaveTimeoutID = window.setTimeout(function () {
+						screen.bot.creator(creatorEdit.value);
+					}, creatorSaveTimeoutDelay);
+				}
+			});
+
 			var optionsList = document.createElement('ul');
 			optionsList.style.clear = 'both';
 			div.appendChild(optionsList);
@@ -52,8 +71,18 @@ defineScreen(function (screen) {
 			//h2.style.display = 'inline';
 			//var displayName = controller.name() ||  '(' + controller.controllerID + ')';
 			h2.textContent = 'Name: ';
-			//li.appendChild(h2);
+			li.appendChild(h2);
 			li.appendChild(nameEdit);
+			index++;
+			if(index % 2) li.className += ' even';
+			else li.className += ' odd';
+			fragment.appendChild(li);
+
+			li = document.createElement('li');
+			h2 = document.createElement('h2');
+			h2.textContent = 'Created by: ';
+			li.appendChild(h2);
+			li.appendChild(creatorEdit);
 			index++;
 			if(index % 2) li.className += ' even';
 			else li.className += ' odd';
@@ -102,6 +131,7 @@ defineScreen(function (screen) {
 				screen.bot = bot;
 				//screen.titleElement.textContent = 'Edit Bot ' + urlOptions.botID + ' - ' + bot.name();
 				screen.setNameWithoutSave(bot.name());
+				screen.setCreatorWithoutSave(bot.creator());
 				screen.dom.defaultController.textContent = 'Default Controller: ' + bot.defaultControllerID();
 				screen.dom.defaultPort.textContent = 'Default Port: ' + bot.defaultPort();
 

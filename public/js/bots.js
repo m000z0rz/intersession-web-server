@@ -1,9 +1,10 @@
 var Bot = (function() {
-	var Bot = function(_botID, _name, _defaultControllerID, _defaultPort) {
+	var Bot = function(_botID, _name, _creator, _defaultControllerID, _defaultPort) {
 		var self = this;
 
 		var botID = +_botID;
 		var name = _name;
+		var creator = _creator;
 		var defaultControllerID = _defaultControllerID;
 		var defaultPort = _defaultPort;
 
@@ -23,6 +24,14 @@ var Bot = (function() {
 			if(value === undefined) return name;
 			else {
 				name = value;
+				self.save(saveCallback);
+			}
+		};
+
+		this.creator = function(value) {
+			if(value === undefined) return creator;
+			else {
+				creator = value;
 				self.save(saveCallback);
 			}
 		};
@@ -58,6 +67,7 @@ var Bot = (function() {
 			return {
 				botID: self.botID(),
 				name: self.name(),
+				creator: self.creator(),
 				defaultControllerID: self.defaultControllerID(), 
 				defaultPort: self.defaultPort()
 			};
@@ -82,7 +92,7 @@ var Bot = (function() {
 	var botCache = {};
 
 	Bot.fromJSON = function(json) {
-		var bot = new Bot(json.botID, json.name, json.defaultControllerID, json.defaultPort);
+		var bot = new Bot(json.botID, json.name, json.creator, json.defaultControllerID, json.defaultPort);
 
 		return bot;
 	};
