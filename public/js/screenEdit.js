@@ -170,15 +170,17 @@ defineScreen(function (screen) {
 			screen.setNameWithoutSave = function(newName) {
 				disableNameSave = true;
 				nameEdit.value = newName;
-				disableNameSave = true;
+				disableNameSave = false;
 			};
 			var saveTimeoutID;
 			var saveTimeoutDelay = 300;
 			screen.dom.nameEdit.addEventListener('change', function(e) {
-				if(saveTimeoutID) window.clearTimeout(saveTimeoutID);
-				saveTimeoutID = window.setTimeout(function () {
-					screen.controller.name(nameEdit.value);
-				}, saveTimeoutDelay);
+				if(!disableNameSave) {
+					if(saveTimeoutID) window.clearTimeout(saveTimeoutID);
+					saveTimeoutID = window.setTimeout(function () {
+						screen.controller.name(nameEdit.value);
+					}, saveTimeoutDelay);
+				}
 			});
 			screen.dom.titleBar.appendChild(nameEdit);
 

@@ -92,6 +92,7 @@
 
 	function navigateTo(screenName, urlOptions, otherOptions, pushState) {
 		var screen = screenMap[screenName];
+		if(!screen) throw new Error('Unknown screen \'' + screenName + '\'');
 
 		if(pushState === undefined) pushState = true;
 

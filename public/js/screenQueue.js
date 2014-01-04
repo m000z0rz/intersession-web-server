@@ -42,7 +42,7 @@ defineScreen(function (screen) {
 				console.log('bot fetched ', bot);
 				screen.bot = bot;
 				if(!(bot.defaultControllerID() && bot.defaultPort())) {
-					screen.dom.titleElement.textContent = 'Bot ' + urlOptions.botID + ' isn\' setup';
+					screen.dom.titleElement.textContent = 'Bot ' + urlOptions.botID + ' isn\'t setup';
 				} else {
 					Controller.fetchByID(+bot.defaultControllerID(), function(controller) {
 						console.log('controller fetched ', controller);

@@ -14,7 +14,9 @@ defineScreen(function (screen) {
 			screen.dom.portButton.style.maxWidth = '100px';
 
 			screen.dom.botButton = screen.buildTitleButton('', 'Bot', function() {
-				screen.navigateTo('screenBotSelect', {botID: screen.urlOptions.botID});
+				//screen.navigateTo('screenBotSelect', {botID: screen.urlOptions.botID});
+				if(screen.urlOptions.botID && screen.urlOptions.botID !== '') screen.navigateTo('screenEditBot', screen.urlOptions);
+				else screen.navigateTo('screenBotSelect', screen.urlOptions);
 			});
 
 			/*

@@ -412,8 +412,7 @@ socketIO.sockets.on('connection', function(socket) {
 
 
 
-
-	function dequeueFromBot(socket, botID) {
+	function getQueuePosition(socket, botID) {
 		var atIndex;
 		var queue = botQueues[botID];
 
@@ -422,6 +421,13 @@ socketIO.sockets.on('connection', function(socket) {
 				atIndex = queueIndex;
 			}
 		});
+
+		return atIndex;
+	}
+
+	function dequeueFromBot(socket, botID) {
+		var queue = botQueues[botID];
+		var atIndex = getQueuePosition(socket, botID);
 
 		if(atIndex !== undefined) {
 			console.log('pre q: ', queue);
@@ -465,10 +471,15 @@ socketIO.sockets.on('connection', function(socket) {
 			botQueues[botID] = [];
 		}
 
-		queue = botQueues[botID];
-		queue.push({socket: socket});
+		var atIndex = getQueuePosition(socket, botID);
 
-		if(clientCallback) clientCallback({queuePosition: queue.length-1});
+		if(atIndex === undefined) { // not queued, add this socket
+			queue = botQueues[botID];
+			queue.push({socket: socket});
+			if(clientCallback) clientCallback({queuePosition: queue.length-1});
+		} else { // already queued, return position
+			if(clientCallback) clientCallback({queuePosition: atIndex});
+		}
 	});
 
 	socket.on('dequeueFromBot', function(data, clientCallback) {
