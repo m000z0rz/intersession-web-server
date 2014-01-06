@@ -18,6 +18,7 @@ var ControlInterface = (function () {
 		this.comPort = comPort;
 		this.serialBuffer = '';
 		this.receiveWatches = [];
+		this.tiltListeners = [];
 		controlInterfaces.push(this);
 		//Bluetooth.openPort(comPort);
 	};
@@ -67,6 +68,9 @@ var ControlInterface = (function () {
 		return matchingReceiveWatch;
 	};
 
+
+
+
 	ControlInterface.prototype.makeShortcut = function(key, onPressed, onReleased) {
 		var keyIsPressed = false;
 		shortcut.add(key, function(e) {
@@ -109,9 +113,46 @@ var ControlInterface = (function () {
 		controlInterfaces = controlInterfaces.filter(function(controlInterface) {
 			return controlInterface !== self;
 		});
+		this.tiltListeners.forEach(function(fn) {
+			window.removeEventListener('deviceorientation', fn, false);
+		});
+		this.tiltListeners = [];
 		//if(bluetoothReceiveListener) Bluetooth.off('receiveOnPort', bluetoothReceiveListener);
 	};
 
+
+
+
+
+
+	navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+
+	ControlInterface.prototype.hasVibrate = function () {
+		return !!navigator.vibrate;
+	};
+
+	ControlInterface.prototype.vibrate = function (ms) {
+		if(navigator.vibrate) navigator.vibrate(ms);
+	};
+
+	ControlInterface.prototype.stopVibrate = function() {
+		if(navigator.vibrate) navigator.vibrate(0);
+	};
+
+
+
+
+	ControlInterface.prototype.hasTilt = function() {
+		return !!window.DeviceOrientationEvent;
+	};
+
+	ControlInterface.prototype.onTilt = function(fn) {
+		if (window.DeviceOrientationEvent) {
+			// Listen for the event and handle DeviceOrientationEvent object
+			this.tiltListeners.push(fn);
+			window.addEventListener('deviceorientation', fn, false);
+		}
+	};
 
 
 

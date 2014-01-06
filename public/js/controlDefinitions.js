@@ -1336,6 +1336,203 @@ defineControl(function() {
 
 
 
+// tilt
+defineControl(function() {
+	var betaMiddle = 0;
+	var betaHalfRange = 45;
+	var gammaMiddle = -45;
+	var gammaHalfRange = 45;
+
+	var betaBottom = betaMiddle - betaHalfRange;
+	var betaTop = betaMiddle + betaHalfRange;
+	var gammaBottom = gammaMiddle - gammaHalfRange;
+	var gammaTop = gammaMiddle + gammaHalfRange;
+
+	var controlDefinition = {
+		typeID: 'tilt',
+		displayName: 'Tilt (unreliable!)',
+		buildSVG: function(control) {
+			var g = createSVGElement('g');
+
+			g.style.stroke = '#333333';
+			g.style.fill = '#333333';
+
+			var horizontalG = createSVGElement('g');
+			var horizontalPath = createSVGElement('path');
+			svgAttr(horizontalPath, 'd', 'M64,32c0-0.885-0.384-1.681-0.993-2.23l0,0l-10-9l0,0C52.475,20.292,51.771,20,51,20c-1.657,0-3,1.343-3,3\nc0,0.885,0.383,1.681,0.993,2.23l0,0L53.182,29H10.818l4.189-3.77l0,0C15.617,24.681,16,23.885,16,23c0-1.657-1.343-3-3-3\nc-0.772,0-1.475,0.292-2.007,0.77l0,0l-10,9l0,0C0.384,30.319,0,31.115,0,32s0.383,1.68,0.993,2.23l0,0l10,9l0,0\nC11.525,43.709,12.228,44,13,44c1.657,0,3-1.343,3-3c0-0.885-0.383-1.68-0.993-2.23l0,0L10.818,35h42.364l-4.188,3.77l0,0\nC48.384,39.32,48,40.115,48,41c0,1.657,1.343,3,3,3c0.771,0,1.475-0.292,2.007-0.77l0,0l10-9l0,0C63.617,33.682,64,32.885,64,32z');
+			horizontalPath.style.strokeWidth = 0;
+			//horizontalPath.style.fill = '#333333';
+			control.svg.horizontalPath = horizontalPath;
+			horizontalG.appendChild(horizontalPath);
+			g.appendChild(horizontalG);
+
+			var verticalG = createSVGElement('g');
+			var verticalPath = createSVGElement('path');
+			svgAttr(verticalG, 'transform', 'translate(0 64)');
+			svgAttr(verticalPath, 'd', 'M41,48c-0.885,0-1.682,0.384-2.23,0.993l0,0L35,53.182V10.818l3.77,4.189l0,0C39.318,15.616,40.115,16,41,16\nc1.657,0,3-1.343,3-3c0-0.772-0.292-1.475-0.77-2.007l0,0l-9-10l0,0C33.682,0.384,32.885,0,32,0s-1.681,0.384-2.23,0.993l0,0\nl-9,10l0,0C20.292,11.525,20,12.228,20,13c0,1.657,1.343,3,3,3c0.885,0,1.681-0.384,2.23-0.993l0,0L29,10.818v42.364l-3.77-4.188\nl0,0C24.681,48.384,23.885,48,23,48c-1.657,0-3,1.343-3,3c0,0.771,0.292,1.475,0.77,2.007l0,0l9,10l0,0\nC30.319,63.617,31.115,64,32,64s1.682-0.383,2.23-0.993l0,0l9-10l0,0C43.708,52.475,44,51.771,44,51C44,49.343,42.657,48,41,48z');
+			verticalPath.style.strokeWidth = 0;
+			//verticalPath.style.fill = '#333333';
+			control.svg.verticalPath = verticalPath;
+			verticalG.appendChild(verticalPath);
+			g.appendChild(verticalG);
+
+			var tiltText = createSVGElement('text');
+			svgAttr(tiltText, 'x', -32); svgAttr(tiltText, 'y', 64);
+			svgAttr(tiltText, 'text-anchor', 'end');
+			svgAttr(tiltText, 'alignment-baseline', 'middle');
+			svgAttr(tiltText, 'font-size', '3em');
+			svgAttr(tiltText, 'font-weight', 'bold');
+			tiltText.textContent = 'Tilt';
+			control.svg.tiltText = tiltText;
+			g.appendChild(tiltText);
+
+			var horizontalLabel = createSVGElement('text');
+			svgAttr(horizontalLabel, 'x', 64+10); svgAttr(horizontalLabel, 'y', 32);
+			svgAttr(horizontalLabel, 'text-anchor', 'start');
+			svgAttr(horizontalLabel, 'alignment-baseline', 'text-after-edge');
+			svgAttr(horizontalLabel, 'font-size', '2em');
+			horizontalLabel.textContent = control.getPropertyValue('horizontalTiltLabel') || '';
+			control.svg.horizontalLabel = horizontalLabel;
+			g.appendChild(horizontalLabel);
+
+			var verticalLabel = createSVGElement('text');
+			svgAttr(verticalLabel, 'x', 64+10); svgAttr(verticalLabel, 'y', 64+32);
+			svgAttr(verticalLabel, 'text-anchor', 'start');
+			svgAttr(verticalLabel, 'alignment-baseline', 'text-after-edge');
+			svgAttr(verticalLabel, 'font-size', '2em');
+			verticalLabel.textContent = control.getPropertyValue('verticalTiltLabel') || '';
+			control.svg.verticalLabel = verticalLabel;
+			g.appendChild(verticalLabel);
+
+
+
+			return g;
+		},
+
+		wireEvents: function(control, svgElement, controlInterface) {
+			/*
+			if(!controlInterface.hasTilt()) {
+				console.log('no tilt');
+				control.g.style.stroke = 'e7e7e9';
+			}
+			console.log('tilt? ', controlInterface.hasTilt());
+			*/
+
+			// by default, assume no tilt. at first tilt event we can reset color
+			control.element.style.stroke = '#e7e7e9';
+			control.element.style.fill = '#e7e7e9';
+
+
+			var timeoutID;
+			var lastSend_ms = (new Date()).valueOf();
+			var sendMinInterval = 100;
+
+
+
+			function makeSendTilt(e) {
+				return function () {
+					if(!(e.beta && e.gamma)) return;
+					if(firstEvent) {
+						control.element.style.stroke = '#333333';
+						control.element.style.fill = '#333333';
+						firstEvent = false;
+					}
+					var toSend = control.getPropertyValue('sendOnTilt');
+					if(toSend && toSend !== '') {
+						var tiltLeftRight = map(e.beta, betaBottom, betaTop, 0, 1023);
+						var tiltFwdBack = map(e.gamma, gammaBottom, gammaTop, 0, 1023);
+						if(tiltLeftRight < 0) tiltLeftRight = 0;
+						if(tiltLeftRight > 1023) tiltLeftRight = 1023;
+						if(tiltFwdBack < 0) tiltFwdBack = 0;
+						if(tiltFwdBack > 1023) tiltFwdBack = 1023;
+					
+						toSend = unescapeForSerial(toSend);
+						toSend = toSend.replace(/\?/, tiltLeftRight);
+						toSend = toSend.replace(/\?/, tiltFwdBack);
+						console.log('send tilt ' + toSend);
+						controlInterface.send(toSend);
+					}
+				};
+			}
+
+			var firstEvent = true;
+			controlInterface.onTilt(function(e) {
+				var delay_ms, now_ms;
+				now_ms = (new Date()).valueOf();
+				if(now_ms - lastSend_ms > sendMinInterval) delay_ms = 0;
+				else delay_ms = sendMinInterval - (now_ms - lastSend_ms);
+
+				if(timeoutID) window.clearTimeout(timeoutID);
+				timeoutID = window.setTimeout(makeSendTilt(e), delay_ms);
+			});
+		},
+
+		properties: {
+			horizontalTiltLabel: {
+				displayName: 'Horizontal Tilt Label',
+				type: 'label',
+				onChange: function(control, newValue, oldValue) {
+					control.svg.horizontalLabel = newValue;
+				}
+			},
+			verticalTiltLabel: {
+				displayName: 'Vertical Tilt Label',
+				type: 'label',
+				onChange: function(control, newValue, oldValue) {
+					control.svg.verticalLabel = newValue;
+				}
+			},
+			sendOnTilt: {
+				displayName: 'Send on tilt change (first ? will be left/right, second ? will be fwd/back)',
+				type: 'serial'
+			},
+
+		},
+	};
+
+	return controlDefinition;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1512,6 +1709,89 @@ defineControl(function() {
 		controlDefinition.properties[propName] = newProp;
 	}
 
+
+	return controlDefinition;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// vibration
+defineControl(function() {
+	var controlDefinition = {
+		typeID: 'vibration',
+		displayName: 'Vibration (unreliable!)',
+		buildSVG: function(control) {
+			var g = createSVGElement('g');
+
+			var path = createSVGElement('path');
+			svgAttr(path, 'd', "M12,18c-1.657,0-3,1.343-3,3v22c0,1.657,1.343,3,3,3s3-1.343,3-3V21C15,19.343,13.657,18,12,18z M3,12\nc-1.657,0-3,1.343-3,3v34c0,1.657,1.343,3,3,3s3-1.343,3-3V15C6,13.343,4.657,12,3,12z M52,18c-1.657,0-3,1.343-3,3v22\nc0,1.657,1.343,3,3,3s3-1.343,3-3V21C55,19.343,53.657,18,52,18z M61,12c-1.657,0-3,1.343-3,3v34c0,1.657,1.343,3,3,3\ns3-1.343,3-3V15C64,13.343,62.657,12,61,12z M43,18H21c-1.657,0-3,1.343-3,3v22c0,1.657,1.343,3,3,3h22c1.657,0,3-1.343,3-3V21\nC46,19.343,44.657,18,43,18z M40,40H24V24h16V40z");
+			path.style.fill = '#e7e7e9';
+			path.style.strokeWidth = 0;
+			g.appendChild(path);
+			control.svg.path = path;
+			return g;
+		},
+		wireEvents: function(control, svgElement, controlInterface) {
+			var rx, stopTimeoutID;
+			var path = control.svg.path;
+
+			function clearColorIn(ms) {
+				if(stopTimeoutID) window.clearTimeout(stopTimeoutID);
+				stopTimeoutID = window.setTimeout(function() {
+					console.log('clear vibrate color');
+					path.style.fill = '#e7e7e9';
+				}, ms);
+			}
+
+			rx = control.getPropertyValue('vibrateOnReceive');
+			if(rx && rx !== '') {
+				console.log('make vibrateOnReceive');
+				controlInterface.watchForReceive(rx, function(value) {
+					console.log('start vibrate');
+					console.log('value: ', value, 'type: ', typeof value);
+					path.style.fill = 'gold';
+					controlInterface.vibrate(+value);
+					clearColorIn(value);
+				});
+			}
+
+			rx = control.getPropertyValue('stopVibrateOnReceive');
+			if(rx && rx !== '') {
+				console.log('make stopVibrateOnReceive');
+				controlInterface.watchForReceive(rx, function() {
+					controlInterface.stopVibrate();
+					clearColorIn(0);
+				});
+			}
+		},
+		properties: {
+			vibrateOnReceive: {
+				displayName: 'Vibrate ? ms when received',
+				type: 'serial'
+			},
+			stopVibrateOnReceive: {
+				displayName: 'Stop vibrating when received',
+				type: 'serial'
+			}
+		},
+	};
 
 	return controlDefinition;
 });

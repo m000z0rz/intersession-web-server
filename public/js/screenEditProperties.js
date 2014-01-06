@@ -40,9 +40,49 @@ defineScreen(function (screen) {
 			var def = control.controlDefinition;
 			screen.dom.header.textContent = def.displayName + ' Properties';
 			var propertiesDiv = screen.dom.propertiesDiv;
-			var documentFragment = document.createDocumentFragment();
+			//var documentFragment = document.createDocumentFragment();
+			var ul = document.createElement('ul');
+			var index=0;
 			clearChildren(propertiesDiv);
 			def.forEachProperty(function(property, propName) {
+				li = document.createElement('li');
+				index++;
+				if(index % 2) li.className += ' even';
+				else li.className += ' odd';
+				//fragment.appendChild(li);
+
+				h2 = document.createElement('h2');
+				h2.textContent = property.displayName + ': ';
+				li.appendChild(h2);
+				if(property.type === 'select') {
+					var select = document.createElement('select');
+					li.appendChild(select);
+					var option;
+					var propVal = control.getPropertyValue(propName);
+					property.values.forEach(function(value) {
+						option = document.createElement('option');
+						option.textContent = value;
+						if(value === propVal) {
+							option.selected = true;
+						}
+						select.appendChild(option);
+					});
+					select.addEventListener('change', function(e) {
+						control.setPropertyValue(propName, select.value);
+					}, false);
+				} else {
+					var input = document.createElement('input');
+					li.appendChild(input);
+					input.value = control.getPropertyValue(propName) || '';
+					input.addEventListener('change', function(e) {
+						control.setPropertyValue(propName, input.value);
+					}, false);
+				}
+
+				ul.appendChild(li);
+
+				/*
+
 				var h2 = document.createElement('h2');
 				h2.style.display = 'inline';
 				h2.textContent = property.displayName + ': ';
@@ -73,12 +113,14 @@ defineScreen(function (screen) {
 					}, false);
 				}
 
-
+				
 
 				documentFragment.appendChild(document.createElement('br'));
+				*/
 			});
 
-			propertiesDiv.appendChild(documentFragment);
+			//propertiesDiv.appendChild(documentFragment);
+			propertiesDiv.appendChild(ul);
 		},
 		onNavigateFrom: function(screen) {
 
