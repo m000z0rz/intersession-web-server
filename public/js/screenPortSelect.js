@@ -19,6 +19,36 @@ defineScreen(function (screen) {
 			header.appendChild(h1);
 			div.appendChild(header);
 
+			var i, portItems, portItem;
+
+			var hostFilter = document.createElement('select');
+			screen.dom.hostFilter = hostFilter;
+			div.appendChild(hostFilter);
+
+			hostFilter.addEventListener('change', function(e) {
+				//console.log('change event', hostFilter.value);
+				var portItems = screen.dom.portList.querySelectorAll('li');
+				if(hostFilter.value === 'Show ports on all hosts') {
+					for(i = 0; i < portItems.length; i++) {
+						portItem = portItems[i];
+						portItem.style.display = '';
+					}
+				} else {
+					var filterOnHostname = hostFilter.value;
+					for(i = 0; i < portItems.length; i++) {
+						portItem = portItems[i];
+						portItem.style.display = 'none';
+					}
+					//console.log('stuff');
+					//console.log(filterOnHostname);
+					//console.log(screen.hostMap);
+					screen.hostMap[filterOnHostname].forEach(function(portItem) {
+						//console.log('loop on portItem ', portItem);
+						portItem.style.display = '';
+					});
+				}
+			}, false);
+
 			var portList = document.createElement('ul');
 			screen.dom.portList = portList;
 			div.appendChild(portList);
@@ -33,12 +63,24 @@ defineScreen(function (screen) {
 			return url;
 		},
 		onNavigateTo: function(screen, urlOptions, otherOptions) {
+			var hostMap = {};
+
+			screen.hostMap = hostMap;
+			screen.dom.hostFilter.style.display = 'none';
+			clearChildren(screen.dom.hostFilter);
+			var option = document.createElement('option');
+			option.textContent = 'Show ports on all hosts';
+			option.selected = 'selected';
+			screen.dom.hostFilter.appendChild(option);
+
 			Bluetooth.listPorts(function(data) {
 				var ports = data.ports;
 
 				var domHostname = screen.dom.hostname;
 				var domList = screen.dom.portList;
-				domHostname.textContent = " on " + data.hostname;
+				
+				if(data.hostname) domHostname.textContent = " on " + data.hostname;
+				else domHostname.textContent = '';
 
 				clearChildren(domList);
 
@@ -53,11 +95,34 @@ defineScreen(function (screen) {
 				domList.appendChild(fragment);
 			});
 
+
+
 			function getPortListElement(port) {
+				var portName = port.portName;
+				var comPort, hostname, pieces;
+				var option;
+
 				var li = document.createElement('li');
+
+				if(portName.indexOf(':') !== -1) {
+					pieces = portName.split(':');
+					hostname = pieces[0];
+					comPort = pieces[1];
+
+					if(!hostMap[hostname]) {
+						hostMap[hostname] = [];
+						option = document.createElement('option');
+						option.textContent = hostname;
+						screen.dom.hostFilter.appendChild(option);
+					}
+					hostMap[hostname].push(li);
+
+					screen.dom.hostFilter.style.display = '';
+				}
+				
 				li.className = 'clickable';
 				var h2 = document.createElement('h2');
-				h2.textContent = port.portName;
+				h2.textContent = portName;
 				var small = document.createElement('small');
 				small.textContent = port.manufacturer || '';
 				//port.isOpen
