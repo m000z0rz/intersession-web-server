@@ -88,6 +88,13 @@ defineScreen(function (screen) {
 			return url;
 		},
 		onNavigateTo: function(screen, urlOptions, otherOptions) {
+			if(!urlOptions.botID) {
+				// redirect
+				window.location = '/screenBotSelect';
+			} else if(!urlOptions.port) {
+				window.location = '/screenPortSelect';
+			}
+
 			var domList = screen.dom.controllerList;
 			clearChildren(domList);
 

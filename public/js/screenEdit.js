@@ -210,7 +210,7 @@ defineScreen(function (screen) {
 				'screenEdit_properties', 'Properties',
 				function() {
 					var control = screen.selectedControl;
-					if(control) screen.navigateTo('screenEditProperties', {control: control});
+					if(control) screen.navigateTo('screenEditProperties', {},  {control: control});
 				},
 				false
 			);

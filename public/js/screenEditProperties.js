@@ -21,11 +21,12 @@ defineScreen(function (screen) {
 		},
 		makeURL: function(urlOptions) {
 			var url = '/screenEditProperties';
+			/*
 			var pieces = ['botID', 'port', 'controllerID'];
 			pieces.forEach(function(piece) {
 				url += '/' + piece + '/' + urlOptions[piece];
 			});
-
+			*/
 			return url;
 		},
 		onNavigateTo: function(screen, urlOptions, otherOptions) {

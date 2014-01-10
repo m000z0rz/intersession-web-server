@@ -28,7 +28,7 @@ defineScreen(function (screen) {
 				var botID = input.value;
 				localStorage['defaultBotID'] = botID;
 				//historyState.botID = botID;
-				screen.navigateTo('screenControlPanel', {botID: botID});
+				screen.navigateTo('screenControlPanel', {botID: botID, port: screen.urlOptions.port});
 			}, false);
 			/*
 			addPointerListeners(continueButton, ['click, touchstart'], function(e) {
